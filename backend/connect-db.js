@@ -1,3 +1,4 @@
+// https://mongoosejs.com/docs/connections.html
 import mongoose from 'mongoose';
 
 export const connectDB = async () => {
