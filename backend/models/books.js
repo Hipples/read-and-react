@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 const BookSchema = new Schema({
+  _id: ObjectId,
   title: String,
   author: String,
   genre: String,
@@ -12,4 +13,4 @@ const BookSchema = new Schema({
   cover_url: String
 });
 
-export const Book = mongoose.model(BookSchema);
+export const Book = mongoose.model('Book', BookSchema);
