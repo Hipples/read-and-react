@@ -22,9 +22,9 @@ const PORT = process.env.PORT || 3000;
 connectDB();
 // cors middleware adds headers to responses that allow requests from different origins, which is useful when developing APIs that will be consumed by different domains
 app.use(cors());
-// this middleware parses incoming requests with URL-encoded payloads (e.g., form submissions) and makes the parsed data available under the req.body property; the 'extended: true' option allows parsing of more complex data structures
+// this middleware parses incoming requests with URL-encoded payloads (e.g., form submissions) and makes the parsed data available under the req.body property; the 'extended: true' option allows parsing of more complex data structures, such as nested objects
 app.use(express.urlencoded({ extended: true }));
-// this middleware parses incoming requests with JSON payloads (common with API clients) and makes the parsed data available under the req.body property
+// this middleware parses incoming requests with JSON payloads (common with REST APIs) and makes the parsed data available under the req.body property
 app.use(express.json());
 
 // add a new Book to the database
@@ -41,15 +41,19 @@ app.post("/api/books", async (req, res) => {
       isbn: req.body.isbn
     });
     await Book.create(newBook);
-    res.json("Data submitted");
-  } catch (error) { res.status(500).json({ error: "An error occurred while fetching books." }); }
+    res.json("Data submitted.");
+  } catch (error) { 
+    console.error("Error occurred while adding a book:", error);
+    res.status(500).json({ error: "An error occurred while adding a book." });
+  }
 });
 
 // update a book in the database
 app.put("/api/books", async (req, res) => {
+  let bookId;
   try {
     console.log(req.body);  // for debugging purposes
-    const bookId = req.body.bookId;
+    bookId = req.body.bookId;
     const updateBook = {
       title: req.body.title,
       author: req.body.author,
@@ -60,8 +64,11 @@ app.put("/api/books", async (req, res) => {
       isbn: req.body.isbn
     }
     await Book.findByIdAndUpdate(bookId, updateBook);
-    res.json("Data submitted");
-  } catch (error) { res.status(500).json({ error: "An error occurred while fetching books."}); }
+    res.json(`Book with id ${bookId} has been updated.`);
+  } catch (error) { 
+    console.error(`Error occurred while updating the book with ID ${bookId}:, ${error}`);
+    res.status(500).json({ error: `An error occurred while updating the book with ID ${bookId}.` }); 
+  }
 });
 
 // delete a book from the database
@@ -77,9 +84,9 @@ app.delete("/api/books/:id", async (req, res) => {
     res.json(`How dare you! Book with ID ${bookId} has been deleted.`);  
   } catch (error) {
     // log the error that occurred (debugging purposes)
-    console.error(`Error occurred while deleting book with ID ${bookId}:`, error);
+    console.error(`Error occurred while deleting the book with ID ${bookId}: ${error}`);
     // send response to client with error
-    res.json(error); 
+    res.status(500).json({ error: `An error occurred while deleting the book with ID ${bookId}.` }); 
   }
 });
 
