@@ -27,10 +27,10 @@ app.use(express.urlencoded({ extended: true }));
 // this middleware parses incoming requests with JSON payloads (common with API clients) and makes the parsed data available under the req.body property
 app.use(express.json());
 
-
-// add a new Book in the database
+// add a new Book to the database
 app.post("/api/books", async (req, res) => {
   try {
+    console.log(req.body);  // for debugging purposes
     const newBook = new Book({
       title: req.body.title,
       author: req.body.author,
@@ -45,12 +45,54 @@ app.post("/api/books", async (req, res) => {
   } catch (error) { res.status(500).json({ error: "An error occurred while fetching books." }); }
 });
 
+// update a book in the database
+app.put("/api/books", async (req, res) => {
+  try {
+    console.log(req.body);  // for debugging purposes
+    const bookId = req.body.bookId;
+    const updateBook = {
+      title: req.body.title,
+      author: req.body.author,
+      genre: req.body.genre,
+      type: req.body.type,
+      price: req.body.price,
+      cover_url: req.body.cover_url,
+      isbn: req.body.isbn
+    }
+    await Book.findByIdAndUpdate(bookId, updateBook);
+    res.json("Data submitted");
+  } catch (error) { res.status(500).json({ error: "An error occurred while fetching books."}); }
+});
 
+// delete a book from the database
+app.delete("/api/books/:id", async (req, res) => {
+  // capture book id from URL parameter
+  const bookId = req.params.id;
+  console.log(`Attempting to delete book with ID: ${bookId}`)  // debugging purposes
+  try {
+    // attempt to delete book with the given ID
+    const result = await Book.deleteOne({ _id: bookId });
+    console.log(`Deletion result: ${result}`);  // debugging purposes    
+    // send a response to the client with a message and the deleted book's ID
+    res.json(`How dare you! Book with ID ${bookId} has been deleted.`);  
+  } catch (error) {
+    // log the error that occurred (debugging purposes)
+    console.error(`Error occurred while deleting book with ID ${bookId}:`, error);
+    // send response to client with error
+    res.json(error); 
+  }
+});
 
-
-
+// define route to handle GET request at the root path
 app.get("/", (req, res) => {
   res.json("Hello mate!");
 });
 
+// define a catch-all route for any requests that do not match any other routes
+app.get("*", (req, res) => {
+  // when accessed, respond with a 404 error code
+  res.sendStatus(404);
+});
+
+// start express server and listen for incoming requests at specified port
 app.listen(PORT, () => { console.log(`Server is running on Port: http://localhost:${PORT}`) });
