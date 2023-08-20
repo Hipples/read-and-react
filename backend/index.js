@@ -4,3 +4,10 @@ import express from 'express';
 if (process.env.ENV === 'dev') require('dotenv').config();
 
 const app = express();
+const PORT = process.env.PORT || 8000;
+
+app.get("/", (req, res) => {
+  res.json("Hello mate!");
+});
+
+app.listen(PORT, () => { console.log(`Server is running on Port: ${PORT}`)});
